@@ -19,8 +19,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn --frozen-lockfile
-      - run: ls -la /home/runner/work/vendure-plugin-simple-auth/vendure-plugin-simple-auth/src/test/fixtures
+      - run: yarn
       - run: yarn lint
       - run: yarn test
-      - run: yarn run build --if-present
+      - run: yarn build --if-present
