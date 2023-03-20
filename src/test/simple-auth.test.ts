@@ -57,7 +57,7 @@ describe('SimpleAuthPlugin Testing', () => {
   beforeAll(async () => {
     try {
       await server.init({
-        productsCsvPath: path.join(__dirname, './fixtures/e2e-product-data-full.csv'),
+        productsCsvPath: './fixtures/e2e-product-data-full.csv',
         initialData: initialData
       });
     } catch (err) {
