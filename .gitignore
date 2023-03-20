@@ -2,3 +2,4 @@ node_modules
 src/test/__data__
 npm-debug.log
 yarn-error.log
+dist
