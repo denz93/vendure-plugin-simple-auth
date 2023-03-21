@@ -2,8 +2,8 @@
 https://docs.nestjs.com/modules
 */
 
+import { CacheModule, Inject } from '@nestjs/common';
 import { AuthenticationStrategy, ConfigService, Logger, PluginCommonModule, Type, VendurePlugin } from '@vendure/core';
-import { CacheModule, Inject } from '@vendure/core/node_modules/@nestjs/common';
 import { EmailPlugin, EmailPluginDevModeOptions } from '@vendure/email-plugin';
 import path from 'path';
 import { SIMPLE_AUTH_PLUGIN_LOG_CONTEXT, SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
@@ -69,10 +69,8 @@ export interface ISimpleAuthPluginOptions {
         PluginCommonModule, 
         CacheModule.register(),
     ],
-    exports: [SimpleAuthService, SimpleAuthResolver],
     providers: [
         SimpleAuthService,
-        SimpleAuthResolver,
         {
             provide: SIMPLE_AUTH_PLUGIN_OPTIONS,
             useFactory: () => SimpleAuthPlugin.options
