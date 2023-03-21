@@ -1,39 +1,49 @@
 {
   "name": "vendure-plugin-simple-auth",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Allow customers login using email and verification code (One time login)",
-  "main": "",
+  "main": "dist/index.js",
   "author": "Nhan Bach <inbox@nhanbach.dev>",
   "license": "MIT",
   "private": false,
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "lint": "eslint ./src --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "build": "tsc"
+    "build": "rimraf dist && tsc"
   },
   "dependencies": {
+    "cache-manager": "^4.1.0",
+    "graphql-tag": "^2.12.6",
+    "isemail": "^3.2.0"
+  },
+  "devDependencies": {
     "@nestjs/common": "^7.6.17",
     "@nestjs/core": "^7.6.17",
     "@nestjs/graphql": "7.10.6",
-    "@vendure/core": "^1.9.3",
-    "@vendure/email-plugin": "^1.9.3",
-    "cache-manager": "^4.1.0",
-    "eslint-config-prettier": "^8.8.0",
-    "graphql-tag": "^2.12.6",
-    "isemail": "^3.2.0",
-    "typescript": "^4.3.5"
-  },
-  "devDependencies": {
     "@nestjs/platform-express": "^7.6.10",
     "@types/cache-manager": "^4.0.2",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "@vendure/admin-ui-plugin": "^1.9.3",
     "@vendure/asset-server-plugin": "^1.9.3",
+    "@vendure/common": "^1.9.3",
+    "@vendure/core": "^1.9.3",
+    "@vendure/email-plugin": "^1.9.3",
     "@vendure/testing": "^1.9.3",
     "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "rimraf": "^4.4.0",
     "sql.js": "^1.8.0",
+    "typescript": "^4.3.5",
     "vitest": "^0.29.5"
   }
 }
