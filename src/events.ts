@@ -1,7 +1,6 @@
-import { RequestContext, VendureEvent } from "@vendure/core"
+import { RequestContext, VendureEvent } from "@vendure/core";
 
 export class OneTimeCodeRequestedEvent extends VendureEvent {
-  createdAt: Date;
 
   constructor(
     public code: string, 
