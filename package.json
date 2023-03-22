@@ -2,14 +2,14 @@
   "name": "@denz93/vendure-plugin-simple-auth",
   "version": "1.1.0",
   "description": "Allow customers login using email and verification code (One time login)",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": "Nhan Bach <inbox@nhanbach.dev>",
   "license": "MIT",
   "keywords": ["vendure", "plugin", "simple-auth", "simple", "auth", "vendure-plugin","vendure.io", "one time login"],
   "private": false,
-  "types": "index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
-    "./"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
@@ -23,7 +23,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build": "rimraf dist && tsc",
-    "postbuild": "cp -R ./src/template package.json LICENSE README.md dist"
+    "postbuild": "cp -R ./src/template dist"
   },
   "dependencies": {
     "cache-manager": "^4.1.0",
