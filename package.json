@@ -1,6 +1,6 @@
 {
   "name": "@denz93/vendure-plugin-simple-auth",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Allow customers login using email and verification code (One time login)",
   "main": "dist/index.js",
   "author": "Nhan Bach <inbox@nhanbach.dev>",
