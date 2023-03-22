@@ -1,5 +1,6 @@
 # Simple Auth Plugin for Vendure.io
 [![Test CI](https://github.com/denz93/vendure-plugin-simple-auth/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/denz93/vendure-plugin-simple-auth/actions/workflows/codeql.yml)
+[![Publish Package to npmjs](https://github.com/denz93/vendure-plugin-simple-auth/actions/workflows/public-package-npmjs.yml/badge.svg?branch=master&event=push)](https://github.com/denz93/vendure-plugin-simple-auth/actions/workflows/public-package-npmjs.yml)
 
 A Vendure plugin allow users log in using email and verification code
 
