@@ -18,21 +18,30 @@ jobs:
   bump_version:
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      tag_version: ${{ steps.bump.outputs.newTag }}
     steps:
-      - uses: actions/checkout@v3
-      - uses: 'phips28/gh-action-bump-version@master'
+      - id: checkout
+        uses: actions/checkout@v3
+      - id: bump
+        uses: 'phips28/gh-action-bump-version@master'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          minor-wording:  'add,Adds,new'
-          major-wording:  'MAJOR,cut-major'
-          patch-wording:  'patch,fixes'
+          minor-wording: 'add,Adds,new'
+          major-wording: 'MAJOR,cut-major'
+          patch-wording: 'patch,fixes'
+          tag-prefix: 'v'
 
   publish:
     needs: bump_version
     runs-on: ubuntu-latest
+    env:
+      newTag: ${{ needs.bump_version.outputs.tag_version }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.newTag }}
       # Setup .npmrc file to publish to npm
       - uses: actions/setup-node@v3
         with:
@@ -41,6 +50,6 @@ jobs:
       - run: yarn
       - run: yarn build
       - run: yarn postbuild
-      - run: yarn publish --access public
+      - run: yarn publish --access public --tag ${{ env.newTag }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
