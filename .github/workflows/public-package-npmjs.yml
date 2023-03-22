@@ -1,7 +1,7 @@
 name: Publish Package to npmjs
 on:
-  release:
-    types: [published]
+  push:
+    branches: master
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,9 +15,21 @@ jobs:
       - run: yarn test
       - run: yarn build
       - run: yarn postbuild
+  bump_version:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: 'phips28/gh-action-bump-version@master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          minor-wording:  'add,Adds,new'
+          major-wording:  'MAJOR,cut-major'
+          patch-wording:  'patch,fixes'
 
   publish:
-    needs: build
+    needs: bump_version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -29,7 +41,6 @@ jobs:
       - run: yarn
       - run: yarn build
       - run: yarn postbuild
-      - run: cd dist
       - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
