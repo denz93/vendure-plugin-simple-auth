@@ -1,6 +1,7 @@
 import { AuthenticationStrategy, ExternalAuthenticationService, Injector, RequestContext, User } from "@vendure/core";
 import { DocumentNode } from "graphql";
 import gql from 'graphql-tag';
+import { validate as isEmail } from "isemail";
 import { SimpleAuthService } from "./simple-auth.service";
 
 export type SimpleAuthData = {
@@ -23,11 +24,15 @@ export class SimpleAuthStrategy implements AuthenticationStrategy<SimpleAuthData
   }
 
   async authenticate(ctx: RequestContext, data: SimpleAuthData): Promise<string | false | User> {
-    const isValidCode = await this.simpleAuthService.verifyCode(data.email, data.code);
+    if (!isEmail(data.email)) {
+      return "Email is invalid";
+    }
+    const email = data.email.toLowerCase();
+    const isValidCode = await this.simpleAuthService.verifyCode(email, data.code);
 
     if (!isValidCode) return "Invalid verification code";
 
-    let user = await this.externalAuthenticationService.findCustomerUser(ctx, this.name, data.email);
+    let user = await this.externalAuthenticationService.findCustomerUser(ctx, this.name, email);
 
     if (user) return user;
 

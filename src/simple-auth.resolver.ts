@@ -1,4 +1,4 @@
-import { Inject } from '@nestjs/common';
+import { Inject, PipeTransform } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { Ctx, EventBus, RequestContext } from '@vendure/core';
 import { validate as isEmail } from 'isemail';
@@ -6,7 +6,15 @@ import { SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
 import { OneTimeCodeRequestedEvent } from './events';
 import { ISimpleAuthPluginOptions } from './simple-auth.module';
 import { SimpleAuthService } from './simple-auth.service';
-
+class EmailValidation implements PipeTransform<string,string> {
+  transform(value: string): string {
+    if (isEmail(value)) {
+      return value.toLowerCase()
+    }
+    throw new Error(`${value} is not a valid email`);
+  }
+  
+}
 export class RequestOneTimeCodeError {
   constructor(email: string) {
 
@@ -27,7 +35,7 @@ export class SimpleAuthResolver {
     }
   
   @Query()
-  async requestOneTimeCode(@Ctx() ctx: RequestContext, @Args('email') email: string) {
+  async requestOneTimeCode(@Ctx() ctx: RequestContext, @Args('email', EmailValidation) email: string) {
     if (!isEmail(email)) {
       return new RequestOneTimeCodeError(email);
     }

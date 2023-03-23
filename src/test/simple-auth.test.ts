@@ -108,7 +108,7 @@ describe('SimpleAuthPlugin Testing', () => {
 
         identifier: TEST_EMAIL
       }
-    });
+    })
   })
 
   test('code should renew after ttl reach', async () => {
@@ -139,8 +139,8 @@ describe('SimpleAuthPlugin Testing', () => {
         message: 'The provided credentials are invalid',
         errorCode: 'INVALID_CREDENTIALS_ERROR'
       })
-    });
-  }, 3000);
+    })
+  }, 3000)
 
   test('should return error if input wrong code', async () => {
     const res = await shopClient.query(REQUEST_ONE_TIME_CODE, { email: TEST_EMAIL });
@@ -154,5 +154,18 @@ describe('SimpleAuthPlugin Testing', () => {
         errorCode: 'INVALID_CREDENTIALS_ERROR'
       })
     });
-  });
-});
+  })
+
+  test('should treat email as case-insensitive', async () => {
+    await shopClient.query(REQUEST_ONE_TIME_CODE, { email: TEST_EMAIL.toUpperCase() });
+    expect(email).toBe(TEST_EMAIL);
+
+    const authRes = await shopClient.query(AUTHENTICATE, {code: code, email: TEST_EMAIL[0].toUpperCase() + TEST_EMAIL.substring(1)});
+    expect(authRes).toMatchObject({
+      authenticate: {
+
+        identifier: TEST_EMAIL
+      }
+    })
+  })
+})
