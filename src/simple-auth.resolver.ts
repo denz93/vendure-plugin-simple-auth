@@ -4,7 +4,7 @@ import { Ctx, EventBus, RequestContext } from '@vendure/core';
 import { validate as isEmail } from 'isemail';
 import { SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
 import { OneTimeCodeRequestedEvent } from './events';
-import { ISimpleAuthPluginOptions } from './simple-auth.module';
+import { ISimpleAuthPluginOptions } from './interfaces';
 import { SimpleAuthService } from './simple-auth.service';
 class EmailValidation implements PipeTransform<string,string> {
   transform(value: string): string {

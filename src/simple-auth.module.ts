@@ -6,68 +6,24 @@ import { CacheModule, Inject } from '@nestjs/common';
 import { AuthenticationStrategy, ConfigService, Logger, PluginCommonModule, Type, VendurePlugin } from '@vendure/core';
 import { EmailPlugin, EmailPluginDevModeOptions } from '@vendure/email-plugin';
 import path from 'path';
-import { SIMPLE_AUTH_PLUGIN_LOG_CONTEXT, SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
+import { DEFAULT_OPTIONS, SIMPLE_AUTH_PLUGIN_LOG_CONTEXT, SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
 import { copyDir } from './copy-dir';
+import { ISimpleAuthPluginOptions } from './interfaces';
 import { queryExtension } from './schema';
 import { SimpleAuthStrategy } from './simple-auth-strategy';
 import { SimpleAuthResolver } from './simple-auth.resolver';
 import { SimpleAuthService } from './simple-auth.service';
-export interface ISimpleAuthPluginOptions {
-    /**
-     * @description
-     * How many times to allow User attempt the verification code.
-     * After attempts reached, the code will be invalidated
-     * @default
-     * 5
-     */
-    attempts: number
 
-    /**
-     * @description
-     * Time to live in seconds once a code created. 
-     * If the code not being verified by users during the ttl window, it will be discarded
-     * 
-     * @default
-     * 600 - 10 minutes
-     */
-    ttl: number
 
-    /**
-     * @description
-     * How many digits/letters the code should be
-     * 
-     * @example
-     * 6 digits code: 340082
-     * 
-     * @default
-     * 6
-     */
-    length: number
-
-    /**
-     * @description
-     * Allow alphabets in code
-     * 
-     * @default
-     * false - Only digits allow
-     */
-    includeAlphabet: boolean
-
-    /**
-     * @description
-     * Developer mode
-     * If enabled, the code will return along with the response "requestOneTimeCode"
-     * 
-     * @default
-     * false
-     */
-    isDev: boolean
-}
 
 @VendurePlugin({
     imports: [
-        PluginCommonModule, 
-        CacheModule.register(),
+        PluginCommonModule,
+        CacheModule.registerAsync({
+            useFactory: () => {
+                return SimpleAuthPlugin.options.cacheModuleOption;
+            }
+        }),
     ],
     providers: [
         SimpleAuthService,
@@ -107,16 +63,13 @@ export class SimpleAuthPlugin {
         }
     }
  
-    static options: NonNullable<ISimpleAuthPluginOptions>;
+    static options: NonNullable<ISimpleAuthPluginOptions> = DEFAULT_OPTIONS;
     static init(options: Partial<ISimpleAuthPluginOptions> = {}) {
         SimpleAuthPlugin.options = { 
-            attempts: 5, 
-            isDev: false, 
-            ttl: 600, 
-            length: 6,
-            includeAlphabet: false,
+            ...DEFAULT_OPTIONS,
             ...options 
         };
+        
         return SimpleAuthPlugin;
     }
 }
