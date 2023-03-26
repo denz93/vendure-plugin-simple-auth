@@ -1,0 +1,29 @@
+name: publish github pages
+on:
+  push:
+    branches: [master]
+jobs:
+  commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: master
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: yarn
+      - run: yarn coverage
+      - name: push
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git config --global user.name 'denz93'
+          git config --global user.email 'bdnhan182@gmail.com'
+          git fetch
+          git checkout gb_pages
+          mkdir -R ./docs
+          cp -R ./coverage/* ./docs
+          git add docs/*
+          git commit -m "Update page"
+          git push
+          
