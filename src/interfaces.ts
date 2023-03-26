@@ -59,5 +59,22 @@ export interface ISimpleAuthPluginOptions {
    * You also want to @see https://github.com/node-cache-manager/node-cache-manager/tree/4.1.0
    *
    */
-  cacheModuleOption: Omit<CacheManagerOptions | CacheModuleOptions, "ttl">;
+  cacheModuleOption: Omit<CacheManagerOptions | CacheModuleOptions, "ttl">
+
+  /**
+   * @description
+   * Strictly enforce unique email among all strategies
+   * 
+   * For example:
+   *  - One day, user "John" sign in using Google authentication with "john@gmail.com"
+   *  - Another day, user "John" sign in using One-time passcode authenication (this plugin) with the same email
+   *  - This plugin will throw an error if the flag is enabled
+   * 
+   * @default
+   * false
+   * 
+   * @note
+   * This only works if Google authentication plugin using email as an identifier
+   */
+  preventCrossStrategies: boolean;
 }

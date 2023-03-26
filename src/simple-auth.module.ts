@@ -2,8 +2,8 @@
 https://docs.nestjs.com/modules
 */
 
-import { CacheModule, Inject } from '@nestjs/common';
-import { AuthenticationStrategy, ConfigService, Logger, PluginCommonModule, Type, VendurePlugin } from '@vendure/core';
+import { CacheModule, Inject, OnApplicationBootstrap } from '@nestjs/common';
+import { ConfigService, Logger, PluginCommonModule, Type, VendurePlugin } from '@vendure/core';
 import { EmailPlugin, EmailPluginDevModeOptions } from '@vendure/email-plugin';
 import path from 'path';
 import { DEFAULT_OPTIONS, SIMPLE_AUTH_PLUGIN_LOG_CONTEXT, SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
@@ -38,19 +38,23 @@ import { SimpleAuthService } from './simple-auth.service';
     },
     configuration: (conf) => {
         const simpleAuthStrategy = new SimpleAuthStrategy();
-        const strategies = conf.authOptions.shopAuthenticationStrategy as AuthenticationStrategy[];
-        const isExisted = strategies.some(str => str.name === simpleAuthStrategy.name);
-        if (!isExisted) {
-            conf.authOptions.shopAuthenticationStrategy.push(simpleAuthStrategy);
-        }
+        conf.authOptions.shopAuthenticationStrategy.push(simpleAuthStrategy);
         
         return conf;
     },
 })
-export class SimpleAuthPlugin {
+
+export class SimpleAuthPlugin implements OnApplicationBootstrap {
     constructor(@Inject(ConfigService) private conf: ConfigService) {
+        
+    }
+    onApplicationBootstrap() {
+        this.cloneEmailTemplate();
+    }
+
+    cloneEmailTemplate() {
         /* eslint-disable @typescript-eslint/no-explicit-any */
-        const plugins = conf.plugins as Type<any>[];
+        const plugins = this.conf.plugins as Type<any>[];
         const emailPlugin = plugins.find(plg => plg == EmailPlugin);
         if (emailPlugin) {
             const options = (emailPlugin as any)['options'] as EmailPluginDevModeOptions;
@@ -64,7 +68,7 @@ export class SimpleAuthPlugin {
     }
  
     static options: NonNullable<ISimpleAuthPluginOptions> = DEFAULT_OPTIONS;
-    static init(options: Partial<ISimpleAuthPluginOptions> = {}) {
+    static init(options: Partial<ISimpleAuthPluginOptions>) {
         SimpleAuthPlugin.options = { 
             ...DEFAULT_OPTIONS,
             ...options 

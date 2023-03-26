@@ -2,6 +2,7 @@ import { AuthenticationStrategy, ExternalAuthenticationService, Injector, Reques
 import { DocumentNode } from "graphql";
 import gql from 'graphql-tag';
 import { validate as isEmail } from "isemail";
+import { STRATEGY_NAME } from "./constants";
 import { SimpleAuthService } from "./simple-auth.service";
 
 export type SimpleAuthData = {
@@ -10,7 +11,7 @@ export type SimpleAuthData = {
 };
 
 export class SimpleAuthStrategy implements AuthenticationStrategy<SimpleAuthData> {
-  name = 'simple';
+  name = STRATEGY_NAME;
   simpleAuthService: SimpleAuthService;
   externalAuthenticationService: ExternalAuthenticationService;
 

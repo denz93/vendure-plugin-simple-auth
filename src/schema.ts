@@ -2,7 +2,7 @@ import gql from 'graphql-tag';
 
 export const queryExtension = gql`
   extend enum ErrorCode {
-    EMAIL_INVALID
+    CROSS_EMAIL_AUTHENTICATION
   }
   type RequestOneTimeCodeError implements ErrorResult {
     errorCode: ErrorCode!

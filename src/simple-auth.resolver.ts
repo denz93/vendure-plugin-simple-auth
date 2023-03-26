@@ -6,6 +6,7 @@ import { SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
 import { OneTimeCodeRequestedEvent } from './events';
 import { ISimpleAuthPluginOptions } from './interfaces';
 import { SimpleAuthService } from './simple-auth.service';
+
 class EmailValidation implements PipeTransform<string,string> {
   transform(value: string): string {
     if (isEmail(value)) {
@@ -15,15 +16,13 @@ class EmailValidation implements PipeTransform<string,string> {
   }
   
 }
-export class RequestOneTimeCodeError {
-  constructor(email: string) {
 
-    this.message = `${email} is not a valid email`;
-    
+export class RequestOneTimeCodeError {
+  readonly __typename = 'RequestOneTimeCodeError';
+
+  constructor(private message: string, private errorCode: string) {
+    console.log('runhere');
   }
-  __typename = 'RequestOneTimeCodeError';
-  message = 'Email not valid';
-  errorCode = 'EMAIL_INVALID';
 }
 
 @Resolver()
@@ -36,8 +35,12 @@ export class SimpleAuthResolver {
   
   @Query()
   async requestOneTimeCode(@Ctx() ctx: RequestContext, @Args('email', EmailValidation) email: string) {
-    if (!isEmail(email)) {
-      return new RequestOneTimeCodeError(email);
+    if (this.pluginOptions.preventCrossStrategies) {
+      const foundStrategy = await this.service.checkCrossStrategies(ctx, email);
+      if (foundStrategy) 
+        return new RequestOneTimeCodeError(
+          `Email already used with "${foundStrategy}" authentication`, 
+          'CROSS_EMAIL_AUTHENTICATION')
     }
     const value = await this.service.generateCode(email);
     const fiteredValue = this.pluginOptions.isDev ? value : 'A code sent to your email';

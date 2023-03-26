@@ -1,8 +1,9 @@
-import { Injectable, Inject, CACHE_MANAGER } from '@nestjs/common';
-import crypto from 'crypto';
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { ConfigService, ExternalAuthenticationService, RequestContext } from '@vendure/core';
 import { Cache } from 'cache-manager';
-import { SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
-import { ISimpleAuthPluginOptions } from './simple-auth.module';
+import crypto from 'crypto';
+import { SIMPLE_AUTH_PLUGIN_OPTIONS, STRATEGY_NAME } from './constants';
+import { ISimpleAuthPluginOptions } from './interfaces';
 
 @Injectable()
 export class SimpleAuthService {
@@ -10,7 +11,9 @@ export class SimpleAuthService {
 
   constructor(
     @Inject(CACHE_MANAGER) private cache: Cache,
-    @Inject(SIMPLE_AUTH_PLUGIN_OPTIONS) private options: ISimpleAuthPluginOptions
+    @Inject(SIMPLE_AUTH_PLUGIN_OPTIONS) private options: ISimpleAuthPluginOptions,
+    @Inject(ConfigService) private configService: ConfigService,
+    @Inject(ExternalAuthenticationService) private externalAuthService: ExternalAuthenticationService,
   ) {
   }
 
@@ -34,7 +37,7 @@ export class SimpleAuthService {
     code = '';
     for (let i = 0; i < length; i++) {
       const index = crypto.randomInt(0, target.length);
-      code += digits[index];
+      code += target[index];
     }
 
     await this.cache.set(key, code, ttl);
@@ -49,5 +52,25 @@ export class SimpleAuthService {
       return true;
     }
     return false;
+  }
+
+  getAllStrategyNames () {
+    return this.configService
+    .authOptions
+    .shopAuthenticationStrategy
+    .map(strategy => strategy.name)
+    .filter(name => name !== STRATEGY_NAME);
+  }
+
+  async checkCrossStrategies(ctx: RequestContext, email: string) {
+    for (const strategyName of this.getAllStrategyNames()) {
+      const user = await this.externalAuthService.findCustomerUser(
+        ctx,
+        strategyName,
+        email
+      );
+      if (user) return strategyName;
+    }
+    return null;
   }
 }

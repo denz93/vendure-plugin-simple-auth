@@ -1,11 +1,14 @@
-import { EventBus } from '@vendure/core';
+import { EventBus, ExternalAuthenticationService, NativeAuthenticationMethod } from '@vendure/core';
+import { EmailPlugin } from '@vendure/email-plugin';
 import { createTestEnvironment, registerInitializer, SqljsInitializer, testConfig } from '@vendure/testing';
+import fs from 'fs';
 import gql from 'graphql-tag';
 import path from 'path';
 import { Subscription } from 'rxjs';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { OneTimeCodeRequestedEvent } from '../events';
 import { SimpleAuthPlugin } from '../simple-auth.module';
+import { SimpleAuthService } from '../simple-auth.service';
 import { initialData } from './fixtures/e2e-initial-data';
 
 async function sleep(ms = 1000) {
@@ -47,11 +50,25 @@ const AUTHENTICATE = gql(`
 
 registerInitializer('sqljs', new SqljsInitializer(sqliteDataDir));
 describe('SimpleAuthPlugin Testing', () => {
-  const TEST_EMAIL = 'test@gmail.com';
+  const TEST_EMAIL = 'test@gmail.com'
+
+  fs.mkdirSync(path.join(__dirname, '__data__/email/output'), { recursive: true })
+  fs.mkdirSync(path.join(__dirname, '__data__/email/mailbox'), { recursive: true })
+  fs.mkdirSync(path.join(__dirname, '__data__/email/templates/partials'), { recursive: true })
+
 
   const { server, shopClient } = createTestEnvironment({
     ...testConfig,
-    plugins: [SimpleAuthPlugin.init({ttl: 2})]
+    plugins: [
+      EmailPlugin.init({
+        devMode: true,
+        outputPath: path.join(__dirname, '__data__/email/output'),
+        route: path.join(__dirname, '__data__/email/mailbox'),
+        templatePath: path.join(__dirname, '__data__/email/templates'),
+        handlers: []
+      }),
+      SimpleAuthPlugin.init({ttl: 1, preventCrossStrategies: true})
+    ]
   });
 
   beforeAll(async () => {
@@ -80,8 +97,11 @@ describe('SimpleAuthPlugin Testing', () => {
   let code = '';
   let email = '';
   let subscription: Subscription | null;
+  let options: typeof SimpleAuthPlugin.options;
+
   beforeEach(async () => {
     await shopClient.asAnonymousUser();
+    options = {...SimpleAuthPlugin.options };
 
     const eventBus = await server.app.resolve(EventBus);
     subscription = eventBus.ofType(OneTimeCodeRequestedEvent).subscribe((event) => {
@@ -90,6 +110,8 @@ describe('SimpleAuthPlugin Testing', () => {
     });
   })
   afterEach(() => {
+    Object.keys(options).forEach(k => SimpleAuthPlugin.options[k] = options[k]);
+
     subscription?.unsubscribe();
     code = '';
     email = '';
@@ -121,7 +143,7 @@ describe('SimpleAuthPlugin Testing', () => {
     await shopClient.query(REQUEST_ONE_TIME_CODE, { email: TEST_EMAIL});
     expect(code).toBe(saveCode);
 
-    await sleep(2100);
+    await sleep(1100);
 
     await shopClient.query(REQUEST_ONE_TIME_CODE, { email: TEST_EMAIL});
     expect(code).not.toBe(saveCode);
@@ -132,7 +154,7 @@ describe('SimpleAuthPlugin Testing', () => {
     const res = await shopClient.query(REQUEST_ONE_TIME_CODE, { email: TEST_EMAIL });
     expect(res).toMatchObject({requestOneTimeCode: {value: 'A code sent to your email'}});
     expect(email).toBe(TEST_EMAIL);
-    await sleep(2100);
+    await sleep(1100);
     const authRes = await shopClient.query(AUTHENTICATE, {code: code, email: TEST_EMAIL});
     expect(authRes).toEqual({
       authenticate: expect.objectContaining({
@@ -143,6 +165,8 @@ describe('SimpleAuthPlugin Testing', () => {
   }, 3000)
 
   test('should return error if input wrong code', async () => {
+    SimpleAuthPlugin.options.preventCrossStrategies = false
+    
     const res = await shopClient.query(REQUEST_ONE_TIME_CODE, { email: TEST_EMAIL });
     expect(res).toMatchObject({requestOneTimeCode: {value: 'A code sent to your email'}});
     expect(email).toBe(TEST_EMAIL);
@@ -154,6 +178,7 @@ describe('SimpleAuthPlugin Testing', () => {
         errorCode: 'INVALID_CREDENTIALS_ERROR'
       })
     });
+
   })
 
   test('should treat email as case-insensitive', async () => {
@@ -167,5 +192,110 @@ describe('SimpleAuthPlugin Testing', () => {
         identifier: TEST_EMAIL
       }
     })
+  })
+
+  test('input invalid email should be handled', async () => {
+      try {
+          await shopClient
+          .query(REQUEST_ONE_TIME_CODE, {email: 'Thisnotanemail'})
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error)
+        expect(err.response.errors.length).toBeGreaterThan(0)
+        expect(err.response.errors[0]).toMatchObject({
+          message: 'Thisnotanemail is not a valid email'
+        })
+      }
+        const res = await shopClient.query(AUTHENTICATE, { email: 'Thisisnotanemail', code: 'XXX' })
+        expect(res).toEqual({
+          authenticate: expect.objectContaining({
+            authenticationError: 'Email is invalid'
+          })
+        })
+      
+  })
+
+  test('raise error when cross authentication detected', async () => {
+    const externalAuthService = server.app.get(ExternalAuthenticationService);
+    const spy = vi.spyOn(externalAuthService, 'findCustomerUser');
+
+    spy.mockResolvedValue({
+      id: 1,
+      authenticationMethods: [],
+      createdAt: new Date(),
+      customFields: [],
+      deletedAt: new Date(),
+      identifier: TEST_EMAIL,
+      verified: true,
+      roles: [],
+      getNativeAuthenticationMethod: (strict?: boolean) => ({} as NativeAuthenticationMethod),
+      lastLogin: null,
+      updatedAt: new Date()
+
+    });
+
+    const res = await shopClient.query(REQUEST_ONE_TIME_CODE, {email: TEST_EMAIL})
+    expect(res.requestOneTimeCode).toMatchObject({
+      errorCode: 'CROSS_EMAIL_AUTHENTICATION',
+      message: 'Email already used with "native" authentication'
+    })
+    spy.mockClear();
+    spy.mockRestore();
+  })
+
+  test('code should include alphabets', async () => {
+    const simpleAuthService = server.app.get(SimpleAuthService);
+    expect(simpleAuthService).toBeInstanceOf(SimpleAuthService);
+    const tries = 10;
+    SimpleAuthPlugin.options.includeAlphabet = true;
+    const codes: string[] = [];
+
+    for (let i = 0; i < tries; i++) {
+      const code = await simpleAuthService.generateCode(`testing${i}@gmail.com`);
+      codes.push(code);
+    }
+    expect(codes.some(code => code.match(/[a-z]+/i))).toBeTruthy();
+  });
+
+  test('code should return along with requestOneTimeCode in dev mode', async () => {
+    SimpleAuthPlugin.options.isDev = true
+
+    const res = await shopClient.query(REQUEST_ONE_TIME_CODE, {email: TEST_EMAIL})
+    expect(res.requestOneTimeCode).toMatchObject({
+      value: code
+    })
+
+  })
+})
+
+describe('SimpleAuthPlugin load without EmailPlugin', () => {
+  /**
+   * Without saveOptions, this suite test will affect other suites
+   * because SimpleAuthPlugin.options is static
+   * 
+   * In real application, this is not the case because SimpleAuthPlugin
+   * should only init once
+   */
+  const saveOptions = SimpleAuthPlugin.options;
+
+  const {server} = createTestEnvironment({
+    ...testConfig,
+    plugins: [
+      SimpleAuthPlugin.init(saveOptions)
+    ]
+  })
+  beforeAll(async () => {
+    await server.init({
+      productsCsvPath: path.join(__dirname, 'fixtures/e2e-product-data-full.csv'),
+      initialData: initialData
+    })
+  })
+
+  afterAll(async () => {
+    await server.destroy();
+  })
+
+  test('server runs', () => {
+    const plugin = server.app.get(SimpleAuthPlugin)
+    expect(plugin).toBeInstanceOf(SimpleAuthPlugin)
   })
 })

@@ -14,5 +14,8 @@ export const DEFAULT_OPTIONS: ISimpleAuthPluginOptions = {
   ttl: 600, 
   length: 6,
   includeAlphabet: false,
-  cacheModuleOption: {}
+  cacheModuleOption: {},
+  preventCrossStrategies: false
 };
+
+export const STRATEGY_NAME = 'simple';
