@@ -3,3 +3,4 @@ src/test/__data__
 npm-debug.log
 yarn-error.log
 dist
+coverage
