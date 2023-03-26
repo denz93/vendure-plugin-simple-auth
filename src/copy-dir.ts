@@ -28,11 +28,11 @@ export function copyDir(src: string, dest: string, {
       fs.copyFileSync(absPathSrc, absPathDest);
       continue;
     }
-    if (isDir(absPathSrc)) {
-      !isDir(absPathDest) && fs.mkdirSync(absPathDest);
-      const subDirs = fs.readdirSync(absPathSrc);
-      stack.push(...subDirs.map(sub => path.join(relativePath, sub)));
-    }
+    // absPathSrc is dir
+    !isDir(absPathDest) && fs.mkdirSync(absPathDest);
+    const subDirs = fs.readdirSync(absPathSrc);
+    stack.push(...subDirs.map(sub => path.join(relativePath, sub)));
+    
   }
 }
 
