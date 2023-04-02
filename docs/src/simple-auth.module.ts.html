@@ -25,28 +25,28 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>21/21</span>
+                <span class='fraction'>28/28</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/2</span>
+                <span class='fraction'>4/4</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>8/8</span>
+                <span class='fraction'>11/11</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>18/18</span>
+                <span class='fraction'>23/23</span>
             </div>
         
             
@@ -142,7 +142,25 @@
 <a name='L77'></a><a href='#L77'>77</a>
 <a name='L78'></a><a href='#L78'>78</a>
 <a name='L79'></a><a href='#L79'>79</a>
-<a name='L80'></a><a href='#L80'>80</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L80'></a><a href='#L80'>80</a>
+<a name='L81'></a><a href='#L81'>81</a>
+<a name='L82'></a><a href='#L82'>82</a>
+<a name='L83'></a><a href='#L83'>83</a>
+<a name='L84'></a><a href='#L84'>84</a>
+<a name='L85'></a><a href='#L85'>85</a>
+<a name='L86'></a><a href='#L86'>86</a>
+<a name='L87'></a><a href='#L87'>87</a>
+<a name='L88'></a><a href='#L88'>88</a>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -166,6 +184,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -189,11 +208,24 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -225,12 +257,14 @@
 https://docs.nestjs.com/modules
 */
 &nbsp;
-import { CacheModule, Inject, OnApplicationBootstrap } from '@nestjs/common';
+import { CacheModule, Inject, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common';
 import { ConfigService, Logger, PluginCommonModule, Type, VendurePlugin } from '@vendure/core';
-import { EmailPlugin, EmailPluginDevModeOptions } from '@vendure/email-plugin';
+import { EmailPlugin, EmailPluginOptions } from '@vendure/email-plugin';
+import { EMAIL_PLUGIN_OPTIONS } from '@vendure/email-plugin/lib/src/constants';
 import path from 'path';
-import { DEFAULT_OPTIONS, SIMPLE_AUTH_PLUGIN_LOG_CONTEXT, SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
+import { DEFAULT_OPTIONS, EMAIL_EVENT_NAME, SIMPLE_AUTH_PLUGIN_LOG_CONTEXT, SIMPLE_AUTH_PLUGIN_OPTIONS } from './constants';
 import { copyDir } from './copy-dir';
+import { oneTimeCodeRequestedEventHandler } from './email-handler';
 import { ISimpleAuthPluginOptions } from './interfaces';
 import { queryExtension } from './schema';
 import { SimpleAuthStrategy } from './simple-auth-strategy';
@@ -247,6 +281,7 @@ import { SimpleAuthService } from './simple-auth.service';
                 return SimpleAuthPlugin.options.cacheModuleOption;
             }
         }),
+        EmailPlugin
     ],
     providers: [
         SimpleAuthService,
@@ -267,12 +302,25 @@ import { SimpleAuthService } from './simple-auth.service';
     },
 })
 &nbsp;
-export class SimpleAuthPlugin implements OnApplicationBootstrap {
-    constructor(@Inject(ConfigService) private conf: ConfigService) {
+export class SimpleAuthPlugin implements OnApplicationBootstrap, OnModuleInit {
+    constructor(
+        @Inject(ConfigService) private conf: ConfigService, 
+        @Inject(EMAIL_PLUGIN_OPTIONS) private emailConf: EmailPluginOptions) {
         
+    }
+    onModuleInit() {
+       this.registerEventHandler()
     }
     onApplicationBootstrap() {
         this.cloneEmailTemplate();
+    }
+&nbsp;
+    registerEventHandler() {
+        const handlerExisted = 
+            this.emailConf.handlers.some(handler =&gt; handler.listener.type === EMAIL_EVENT_NAME)
+        if (handlerExisted) { return }
+&nbsp;
+        this.emailConf.handlers.push(oneTimeCodeRequestedEventHandler)
     }
 &nbsp;
     cloneEmailTemplate() {
@@ -280,7 +328,7 @@ export class SimpleAuthPlugin implements OnApplicationBootstrap {
         const plugins = this.conf.plugins as Type&lt;any&gt;[];
         const emailPlugin = plugins.find(plg =&gt; plg == EmailPlugin);
         if (emailPlugin) {
-            const options = (emailPlugin as any)['options'] as EmailPluginDevModeOptions;
+            const options = (emailPlugin as any)['options'] as EmailPluginOptions;
             const templatePath = options.templatePath;
             copyDir(path.join(__dirname, './template/onetimecode-requested'),
                  templatePath);
@@ -307,7 +355,7 @@ export class SimpleAuthPlugin implements OnApplicationBootstrap {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2023-03-26T03:06:37.535Z
+                at 2023-04-02T23:14:30.270Z
             </div>
         <script src="../prettify.js"></script>
         <script>

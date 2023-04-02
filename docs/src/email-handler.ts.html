@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for src/constants.ts</title>
+    <title>Code coverage report for src/email-handler.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,13 +19,13 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> constants.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">src</a> email-handler.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
@@ -39,14 +39,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/0</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
@@ -73,57 +73,27 @@
 <a name='L8'></a><a href='#L8'>8</a>
 <a name='L9'></a><a href='#L9'>9</a>
 <a name='L10'></a><a href='#L10'>10</a>
-<a name='L11'></a><a href='#L11'>11</a>
-<a name='L12'></a><a href='#L12'>12</a>
-<a name='L13'></a><a href='#L13'>13</a>
-<a name='L14'></a><a href='#L14'>14</a>
-<a name='L15'></a><a href='#L15'>15</a>
-<a name='L16'></a><a href='#L16'>16</a>
-<a name='L17'></a><a href='#L17'>17</a>
-<a name='L18'></a><a href='#L18'>18</a>
-<a name='L19'></a><a href='#L19'>19</a>
-<a name='L20'></a><a href='#L20'>20</a>
-<a name='L21'></a><a href='#L21'>21</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L11'></a><a href='#L11'>11</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span></td><td class="text"><pre class="prettyprint lang-js">import { ISimpleAuthPluginOptions } from "./interfaces";
+<span class="cline-any cline-yes">9x</span></td><td class="text"><pre class="prettyprint lang-js">import { EmailEventListener } from "@vendure/email-plugin";
+import { EMAIL_EVENT_NAME } from "./constants";
+import { OneTimeCodeRequestedEvent } from "./events";
 &nbsp;
-export const SIMPLE_AUTH_PLUGIN_OPTIONS = Symbol("SIMPLE_AUTH_PLUGIN_OPTIONS");
-&nbsp;
-export const SIMPLE_AUTH_PLUGIN_LOG_CONTEXT = 'SimpleAuthPlugin';
-&nbsp;
-export const EMAIL_EVENT_NAME = 'onetimecode-requested';
-&nbsp;
-export const EMAIL_TEMPLATE_NAME = EMAIL_EVENT_NAME;
-&nbsp;
-export const DEFAULT_OPTIONS: ISimpleAuthPluginOptions = {
-  attempts: 5, 
-  isDev: false, 
-  ttl: 600, 
-  length: 6,
-  includeAlphabet: false,
-  cacheModuleOption: {},
-  preventCrossStrategies: false
-};
-&nbsp;
-export const STRATEGY_NAME = 'simple';</pre></td></tr></table></pre>
+export const oneTimeCodeRequestedEventHandler = 
+  new EmailEventListener(EMAIL_EVENT_NAME)
+  .on(OneTimeCodeRequestedEvent)
+  .setRecipient(event =&gt; event.email)
+  .setSubject('One Time Code for website')
+  .setFrom("{{ fromAddress }}")
+  .setTemplateVars((event) =&gt; ({code: event.code}));</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
             </div><!-- /wrapper -->
