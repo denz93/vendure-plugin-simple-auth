@@ -36,6 +36,7 @@
     "postbuild": "cp -R ./src/template dist"
   },
   "dependencies": {
+    "@vendure/email-plugin": "^1.9.5",
     "cache-manager": "^4.1.0",
     "graphql-tag": "^2.12.6",
     "isemail": "^3.2.0"
@@ -52,7 +53,6 @@
     "@vendure/asset-server-plugin": "^1.9.3",
     "@vendure/common": "^1.9.3",
     "@vendure/core": "^1.9.3",
-    "@vendure/email-plugin": "^1.9.3",
     "@vendure/testing": "^1.9.3",
     "@vitest/coverage-istanbul": "^0.29.7",
     "eslint": "^8.36.0",

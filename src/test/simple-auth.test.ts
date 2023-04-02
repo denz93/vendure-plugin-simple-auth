@@ -1,11 +1,13 @@
 import { EventBus, ExternalAuthenticationService, NativeAuthenticationMethod } from '@vendure/core';
-import { EmailPlugin } from '@vendure/email-plugin';
+import { EmailPlugin, EmailPluginOptions } from '@vendure/email-plugin';
+import { EMAIL_PLUGIN_OPTIONS } from '@vendure/email-plugin/lib/src/constants';
 import { createTestEnvironment, registerInitializer, SqljsInitializer, testConfig } from '@vendure/testing';
 import fs from 'fs';
 import gql from 'graphql-tag';
 import path from 'path';
 import { Subscription } from 'rxjs';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, test, vi, vitest } from 'vitest';
+import { oneTimeCodeRequestedEventHandler } from '../email-handler';
 import { OneTimeCodeRequestedEvent } from '../events';
 import { SimpleAuthPlugin } from '../simple-auth.module';
 import { SimpleAuthService } from '../simple-auth.service';
@@ -264,6 +266,21 @@ describe('SimpleAuthPlugin Testing', () => {
       value: code
     })
 
+  })
+
+  test('email handler should trigger', async () => {
+    const emailOptions = server.app.get<EmailPluginOptions>(EMAIL_PLUGIN_OPTIONS)
+    expect(emailOptions.handlers).contain(oneTimeCodeRequestedEventHandler)
+    const spy = vitest.spyOn(oneTimeCodeRequestedEventHandler, 'handle')
+
+    await shopClient.query(REQUEST_ONE_TIME_CODE, {email: TEST_EMAIL})
+    await sleep(100)
+    expect(spy).toBeCalledTimes(1)
+
+    expect(spy.mock.lastCall?.[0].code).toBe(code)
+    expect(spy.mock.lastCall?.[0].email).toBe(TEST_EMAIL)
+
+    spy.mockClear()
   })
 })
 

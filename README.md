@@ -74,6 +74,31 @@ export const config: VendureConfig  = {
   > **default**: false.  
   > **Note**: This only works if Google authentication plugin using email as an identifier
 
-## Future Updates
+### 4. Add `EmailHandler` to EmailPlugin
+
+** **Note**: Since `v1.3.0` you don't need to config this step anymore. The plugin will automatically append the `handler` to `Email Plugin`
+
+```typescript
+// vendure-config.ts
+
+import { oneTimeCodeRequestedEventHandler } from '@denz93/vendure-plugin-simple-auth';
+
+...
+
+export const config: VendureConfig = {
+  ...
+
+  plugins: [
+    ...
+
+    EmailPlugin.init({
+      ...
+      handlers: [...defaultEmailHandler, oneTimeCodeRequestedEventHandler]
+    })
+  ]
+}
+```
+
+## Future Updates 
 
 - [x] Prevent cross authenticate (Ex: users use same email for GoogleAuth and SimpleAuth)
