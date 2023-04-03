@@ -1360,10 +1360,10 @@
     rxjs "^6.6.3"
     typeorm "0.2.45"
 
-"@vendure/email-plugin@^1.9.5":
-  version "1.9.5"
-  resolved "https://registry.yarnpkg.com/@vendure/email-plugin/-/email-plugin-1.9.5.tgz#6bf5e7561a428ac9c7b0b66aab2ea15abc9f0fe6"
-  integrity sha512-RONxlBVTZa+hqF99sE5cRmdS8w7RCBW4Loo3wvRY4C6dAtODero+vPFcT2FFskD8iEr+QHRv69Wx8TrOZYSHaQ==
+"@vendure/email-plugin@1.9.3":
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/@vendure/email-plugin/-/email-plugin-1.9.3.tgz#7cde8421c562753c9f7beafc8c4f772975087ca7"
+  integrity sha512-CzJbY6BQr5H0g+TmlXaBa71E0WUYPgVKQ+L+Djt/Ng07JusL5yuclMS7lV+oQAFCbdhaPCmhLFqzunrgdfaS9A==
   dependencies:
     "@types/nodemailer" "^6.4.0"
     dateformat "^3.0.3"
